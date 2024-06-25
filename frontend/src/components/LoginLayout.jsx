@@ -1,34 +1,44 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { UserContext } from "../UserContext";
 
 
 function LoginLayout(){
     const [email, setEmail]=useState('');
     const [password, setPassword]=useState('');
+    const [redirect, setredirect]=useState(false);
     const navigate=useNavigate();
+    const {setUser}=useContext(UserContext);
 
     const loginUser = async (e) => {
          e.preventDefault();
-        try{
-            const response = await axios.post('http://localhost:3000/login', {
+      
+        try {
+            const response = await axios.post('http://localhost:4000/login', {
                 email,
                 password
             });
-            if (response.status === 200) {
-                alert("login successful!");
-                navigate("/", { state: { user: response.data.user } });
-            }else {
-                alert("Invalid credentials");
-            }
-            
-        }catch(e){
-            alert("login failed");
 
+            if (response.status === 200) {
+                setUser(response.data);
+                alert("Login successful!");
+                setredirect(true);
+            } 
+        } catch (e) {
+            if (e.response && e.response.status === 401) {
+                alert("Invalid credentials");
+            } else {
+                alert("Login failed");
+            }
+            console.log(e);
         }
         
+    }
+    if(redirect){
+        navigate('/');
     }
     return (
         <div className="flex justify-center items-center mt-48 text-center">

@@ -11,7 +11,7 @@ function RegisterLayout() {
 
     function registerUser() {
         try{
-            axios.post('http://localhost:3000/register', {
+            axios.post('http://localhost:4000/register', {
             name,
             email,
             password,
