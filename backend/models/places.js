@@ -12,6 +12,8 @@ const PlaceSchema = mongoose.Schema({
   checkIn: String,
   checkOut: String,
   maxGuests: Number,
+  price: Number,
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to the user
 });
 
 const PlaceModel = mongoose.model("PlaceModel", PlaceSchema);

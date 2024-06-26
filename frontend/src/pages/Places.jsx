@@ -1,12 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import axios from 'axios';
 import Perks from '../components/Perks';
 
 const Places = () => {
-    // const {action} = useParams();
-    // console.log(action);
+    
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -17,6 +16,9 @@ const Places = () => {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
     const [maxGuests, setMaxGuests] = useState(1);
+    const [price, setPrice] = useState(0);
+    const { id } = useParams();
+    
 
     function uploadPhoto(ev){
         const files = ev.target.files;
@@ -38,7 +40,12 @@ const Places = () => {
 
     async function handleformsub(ev){
         ev.preventDefault();
-        await axios.post('http://localhost:4000/places', {
+        
+        const token = localStorage.getItem('token'); // Get token from local storage
+        console.log("retrived from local storage ", token);
+        if (id){
+            await axios.put('http://localhost:4000/places/'+id, {
+            
             title,
             description,
             address,
@@ -47,10 +54,56 @@ const Places = () => {
             extraInfo,
             checkIn,
             checkOut,
-            maxGuests
+            maxGuests, 
+            price
             
-        });
+            }, {
+                headers: {
+                'Authorization': `Bearer ${token}`
+            }
+      });
+    }else{
+            await axios.post('http://localhost:4000/places', {
+            title,
+            description,
+            address,
+            photos,
+            perks,
+            extraInfo,
+            checkIn,
+            checkOut,
+            maxGuests,
+            price
+            
+        }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    }
+        
         navigate('/account/accomodations')
+    }
+
+    useEffect(()=>{
+        if(!id) return
+        axios.get(`http://localhost:4000/places/${id}`).then((response)=>{
+            const {data} = response;
+            setTitle(data.title);
+            setDescription(data.description);
+            setAddress(data.address);
+            setPhotos(data.photos);
+            setPerks(data.perks);
+            setExtraInfo(data.extraInfo);
+            setCheckIn(data.checkIn);
+            setCheckOut(data.checkOut);
+            setMaxGuests(data.maxGuests);
+            setPrice(data.price);
+        })
+    }, [id])
+
+     function removePhoto(photo) {
+        setPhotos(prevPhotos => prevPhotos.filter(p => p !== photo));
     }
 
     
@@ -76,7 +129,13 @@ const Places = () => {
                     <div className='flex gap-2 flex-wrap mt-4'>
                         {photos.map((photo, index) => (
                             <div key={index} className='relative'>
-                                <img src={`http://localhost:4000/${photo}`} alt="uploaded" className='w-32 h-32 object-cover' />
+                                <img src={`http://localhost:4000/${photo}`} alt="uploaded" className='w-32 h-32 object-cover ' />
+                                <button className='absolute right-0 bottom-1' onClick={() => removePhoto(photo)} >
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 bg-black opacity-65 text-white p-1" >
+                                            <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+                                            </svg>
+
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -102,6 +161,10 @@ const Places = () => {
                     <div className='w-full'>
                         <h3>No. of Guests</h3>
                         <input type='number' value={maxGuests} onChange={e=> setMaxGuests(e.target.value)} className='border-2 w-full rounded-md p-1.5 mb-3' placeholder='3'></input>
+                    </div>
+                    <div className='w-full'>
+                        <h3>Price Per Night</h3>
+                        <input type='number' value={price} onChange={e=> setPrice(e.target.value)} className='border-2 w-full rounded-md p-1.5 mb-3' placeholder='$50000'></input>
                     </div>
                 </div>
                 <button className='bg-red-500 p-2 rounded-md w-full text-white'>Save</button>

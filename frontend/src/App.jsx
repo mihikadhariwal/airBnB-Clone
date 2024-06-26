@@ -6,6 +6,7 @@ import Register from './pages/Register.jsx';
 import Account from './pages/Account.jsx';
 import { UserContextProvider } from './UserContext.jsx';
 import Places from './pages/Places.jsx';
+import SinglePage from './pages/SinglePage.jsx';
 
 
 
@@ -21,6 +22,8 @@ function App() {
       <Route path='/account/bookings' element={<Account/>}></Route>
       <Route path='/account/accomodations' element={<Account/>}></Route>
       <Route path='/account/newplace' element={<Places/>}></Route>
+      <Route path='/account/accomodations/:id' element={<Places/>}></Route>
+      <Route path='/singleplace/:id' element={<SinglePage/>}></Route>
     </Routes>
     </UserContextProvider>
   )

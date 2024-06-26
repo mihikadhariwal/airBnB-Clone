@@ -21,9 +21,13 @@ function LoginLayout(){
                 email,
                 password
             });
+            const { token, user } = response.data;
+            localStorage.setItem('token', token); // Store token in local storage
+            console.log('Logged in user:', user);
+            console.log("token stored in local storage ", token);
 
             if (response.status === 200) {
-                setUser(response.data);
+                setUser(user);
                 alert("Login successful!");
                 setredirect(true);
             } 
