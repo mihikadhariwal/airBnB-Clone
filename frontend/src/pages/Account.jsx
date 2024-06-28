@@ -25,20 +25,21 @@ const Account = () => {
     }
 
     const [places, setPlaces] = useState([]);
+    const [bookings, setBookings] = useState([]);
     
      useEffect(() => {
         const fetchPlaces = async () => {
             try {
                 const token = localStorage.getItem('token');
-                console.log("hell");
-                console.log("token", token);
+                
+                // console.log("token", token);
                 if (token) {
                     const response = await axios.get("http://localhost:4000/places", {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                         },
                     });
-                    console.log(response);
+                    // console.log(response);
                     setPlaces(response.data);
                 } else {
                     console.error('No token found');
@@ -49,6 +50,31 @@ const Account = () => {
         };
 
         fetchPlaces();
+    }, []);
+
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                
+                console.log("tokenn", token);
+                if (token) {
+                    const response = await axios.get("http://localhost:4000/booking", {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                    });
+                    console.log(response);
+                    setBookings(response.data);
+                } else {
+                    console.error('No token found');
+                }
+            } catch (error) {
+                console.error('Error fetching places:', error);
+            }
+        };
+
+        fetchBookings();
     }, []);
 
     return (
@@ -83,7 +109,41 @@ const Account = () => {
                     <button onClick={handleLogout} className='bg-red-500 w-1/4 p-2 rounded-lg text-white mt-3'>Logout</button>
                 </div>
             ) : pathname === '/account/bookings' ? (
-                <div>Bookings</div>
+                <div>
+                    {bookings.length > 0 ? (
+                            bookings.map((booking) => (
+                                <div className='p-4 flex mb-3 mt-5 ml-5 mr-5 border-2 bg-gray-100 rounded-lg'>
+                                    <div className=''>
+                                        {/* {place.photos.map((photo, index) => (
+                                            <img key={index} src={'http://localhost:4000/'+photo} alt={`place-${index}`} className='w-32 h-32 object-cover' />
+                                        ))} */}
+                                        
+                                        <img src={'http://localhost:4000/'+booking.place.photos[0]} className='w-60 h-60 object-cover rounded-lg'></img>
+                                        
+                                    </div>
+                                    <div className='p-5'>
+                                        <h2 className='text-2xl font-bold text-left mb-2'>{booking.place.title}</h2>
+                                        <p className='text-xl p-2'><span className='font-semibold'>Check-in:</span> {new Date(booking.checkIn).toLocaleDateString()}</p>
+                                        <p className='text-xl p-2'><span className='font-semibold'>Check-out:</span> {new Date(booking.checkOut).toLocaleDateString()}</p>
+                                        <p className='text-xl p-2'><span className='font-semibold'>Max Guests:</span> {booking.maxGuests}</p>
+                                        <p className='text-xl p-2'><span className='font-semibold'>Price:</span> <span className='font-bold text-3xl'>${booking.price}</span></p>
+                                        
+                                    </div>
+                                    
+                                </div>
+                            ))
+                        ) : (
+                            <p>No Places Booked yet!</p>
+                        )}                    
+
+
+
+
+
+
+
+
+                </div>
             ) : pathname === '/account/accomodations' ? (
                 <div className='text-center mt-8'>
                     <Link className='bg-red-500 px-6 py-2 rounded-full text-white inline-flex gap-1' to={'/account/newplace'}>

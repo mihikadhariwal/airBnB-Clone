@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const UserModel = require("./models/users.js");
 const PlaceModel = require("./models/places.js");
+const BookingModel = require("./models/booking.js");
 const multer = require("multer");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
@@ -170,6 +171,33 @@ app.get("/allplaces", async (req, res) => {
 app.get("/singleplace/:id", async (req, res) => {
   const { id } = req.params;
   res.json(await PlaceModel.findById(id));
+});
+
+app.post("/booking", authenticateToken, async (req, res) => {
+  const { place, checkIn, checkOut, maxGuests, name, phone, price } = req.body;
+  await BookingModel.create({
+    place,
+    checkIn,
+    checkOut,
+    maxGuests,
+    name,
+    phone,
+    price,
+    user: req.user.id, // Add this line to include the user ID from the JWT
+  });
+  res.json({ message: "Booking created" });
+});
+
+// Get Places Route
+app.get("/booking", authenticateToken, async (req, res) => {
+  try {
+    const places = await BookingModel.find({ user: req.user.id }).populate(
+      "place"
+    );
+    res.json(places);
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred", error });
+  }
 });
 
 app.listen(4000, () => {
